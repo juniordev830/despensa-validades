@@ -24,6 +24,6 @@ export async function changeLot(id:number,amount:number):Promise<void>{
   if(!lot) throw new Error("Lote inexistente.");
   if(!Number.isSafeInteger(amount)||amount<=0||amount>lot.quantity) throw new Error("Estoque insuficiente.");
   const left=lot.quantity-amount;
-  await request(left===0?s.delete(id):s.put({...lot,quantity:left}));
+  if(left===0) await request(s.delete(id)); else await request(s.put({...lot,quantity:left}));
  });
 }
