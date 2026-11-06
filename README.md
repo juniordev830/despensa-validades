@@ -1,48 +1,24 @@
-# Despensa e Validades
+# Despensa e Validades — primeira versão web
 
-> Status: concepção. Este repositório contém apenas o escopo inicial; ainda não há aplicação executável ou funcionalidades implementadas.
+Aplicação **React + TypeScript + IndexedDB** para organizar lotes de alimentos com persistência local no navegador.
 
-## Ideia
+## Entregue
+- Cadastro de produtos, quantidade inteira positiva e data de validade válida.
+- Listagem ordenada por data de vencimento.
+- Consumo de uma unidade por vez e descarte do lote completo.
+- Atualização do saldo sem permitir estoque negativo.
+- Persistência via IndexedDB, sem conta, servidor ou coleta de dados.
 
-Organizar alimentos por lote e validade para reduzir desperdício doméstico.
+## Executar
+Requer Node.js 22+:
+```bash
+npm install
+npm run dev
+```
+Abra a URL exibida pelo Vite. Para compilar: `npm run build`. Para testar as regras de negócio: `npm test`.
 
-## Primeira versão planejada
+## Critério de aceite
+Cadastrar lotes de arroz e feijão com validades diferentes, consumir uma unidade e conferir o novo saldo e a ordem crescente de vencimento.
 
-- [ ] Cadastrar produto, quantidade e data de validade.
-- [ ] Listar itens que vencem primeiro.
-- [ ] Marcar consumo ou descarte.
-
-## Modelo inicial
-
-Produto, lote e movimentação.
-
-## Regras e limites
-
-Só aceitar quantidade positiva e datas válidas; consumo não pode deixar estoque negativo.
-
-Escopo mantido pequeno: sem pagamentos, integrações externas, infraestrutura de produção ou uso de dados pessoais reais nesta etapa.
-
-## Tecnologia proposta
-
-TypeScript + React + IndexedDB.
-
-A escolha é uma proposta para a futura implementação; nenhuma dependência foi instalada e a tecnologia ainda não foi implementada.
-
-## Critério de conclusão do primeiro incremento
-
-Cadastrar dois lotes e consumir um deve atualizar o saldo e manter a ordenação por validade.
-
-## Próximos passos
-
-1. Revisar este escopo antes de começar a implementação.
-2. Preparar o ambiente mínimo da tecnologia escolhida.
-3. Implementar um fluxo completo e validar o critério acima.
-4. Documentar a execução e acrescentar exemplos demonstrativos.
-
-## Possíveis evoluções
-
-Depois de validar o fluxo principal, avaliar persistência, acessibilidade e uma interface mais completa conforme a plataforma. Evoluções não fazem parte da entrega atual.
-
-## Como executar
-
-Ainda não há comandos de execução. Eles serão adicionados quando existir uma primeira versão funcional.
+## Limites
+Uso local no navegador (não sincroniza entre dispositivos). Sem alerta por push, lotes com unidade de medida diferente, usuários, login ou backups. O GitHub Actions executa os testes e build; confirme o resultado do workflow após abrir o PR.
