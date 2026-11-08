@@ -48,6 +48,21 @@ test("reject duplicate lot, bad date, and non-positive or fractional quantity", 
   assert.throws(() => moveStock(p, "Arroz", 1.5, "consumed"), /Quantidade/);
 });
 
+test("normalizes lot identifiers and product names consistently", () => {
+  const pantry = seed();
+  assert.throws(() => registerLot(pantry, {
+    id: "  earlier  ", product: "Outro", expiresOn: "2026-12-01", quantity: 1
+  }), /duplicado/);
+
+  const changed = moveStock(pantry, "  Arroz  ", 2, "consumed");
+  assert.equal(changed.movements[0].product, "Arroz");
+  assert.deepEqual(changed.movements[0].allocations, [
+    { lotId: "earlier", quantity: 2 }
+  ]);
+  assert.equal(report(pantry).units, 8);
+  assert.equal(report(changed).units, 6);
+});
+
 test("same-expiry tie breaker is deterministic", () => {
   let p = emptyPantry();
   p = registerLot(p, { id: "z", product: "Feijao", expiresOn: "2026-12-01", quantity: 2 });
