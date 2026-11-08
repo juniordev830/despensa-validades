@@ -29,3 +29,15 @@ O arquivo `examples/scenario.json` cadastra dois lotes de arroz e um de feijão;
 ## Limitações
 
 Este primeiro incremento é **biblioteca de domínio com CLI de demonstração**. Ainda não há frontend React, IndexedDB, registro persistente de dados reais nem autenticação. Não utilizar informações pessoais nos exemplos. Quantidades representam unidades inteiras; pesagem fracionada requer nova modelagem e testes.
+
+
+## Alertas de vencimento
+
+O relatório opcional classifica os lotes ainda disponíveis como \`expired\` (validade anterior à data), \`due_soon\` (vence hoje ou dentro da janela) e \`fresh\` (fora da janela), com totais de lotes e unidades por categoria.
+
+```bash
+node dist/cli.js examples/scenario.json --as-of=2026-11-08
+node dist/cli.js examples/scenario.json --as-of=2026-11-08 --window=14
+```
+
+As datas são comparadas como dias civis em UTC, sem depender do fuso horário da máquina. A janela é um inteiro de 0 a 3650 dias. Os relatórios não substituem a inspeção física dos alimentos nem determinam se um produto está próprio para consumo.
