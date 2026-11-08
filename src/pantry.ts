@@ -43,11 +43,13 @@ export function registerLot(pantry: Pantry, lot: Lot): Pantry {
   validName(lot.product, "Produto");
   requireQuantity(lot.quantity);
   if (!validDate(lot.expiresOn)) throw new Error("Validade invalida: use AAAA-MM-DD");
-  if (pantry.lots.some(current => current.id === lot.id)) {
-    throw new Error("Lote duplicado: " + lot.id);
+  const id = lot.id.trim();
+  const product = lot.product.trim();
+  if (pantry.lots.some(current => current.id === id)) {
+    throw new Error("Lote duplicado: " + id);
   }
   return {
-    lots: [...pantry.lots, { ...lot, id: lot.id.trim(), product: lot.product.trim() }],
+    lots: [...pantry.lots, { ...lot, id, product }],
     movements: [...pantry.movements],
   };
 }
@@ -67,10 +69,11 @@ export function moveStock(pantry: Pantry, product: string, quantity: number, kin
   if (kind !== "consumed" && kind !== "discarded") {
     throw new Error("Movimento deve ser consumed ou discarded");
   }
-  const eligible = pantry.lots.filter(lot => lot.product === product && lot.quantity > 0)
+  const normalizedProduct = product.trim();
+  const eligible = pantry.lots.filter(lot => lot.product === normalizedProduct && lot.quantity > 0)
     .sort((a, b) => a.expiresOn.localeCompare(b.expiresOn) || a.id.localeCompare(b.id));
   const available = eligible.reduce((sum, lot) => sum + lot.quantity, 0);
-  if (available < quantity) throw new Error("Estoque insuficiente para " + product);
+  if (available < quantity) throw new Error("Estoque insuficiente para " + normalizedProduct);
   let remaining = quantity;
   const selected = new Map<string, number>();
   for (const lot of eligible) {
@@ -83,7 +86,7 @@ export function moveStock(pantry: Pantry, product: string, quantity: number, kin
   const lots = pantry.lots.map(lot => ({ ...lot, quantity: lot.quantity - (selected.get(lot.id) ?? 0) }));
   return {
     lots,
-    movements: [...pantry.movements, { kind, product, quantity, allocations }],
+    movements: [...pantry.movements, { kind, product: normalizedProduct, quantity, allocations }],
   };
 }
 
