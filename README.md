@@ -1,48 +1,43 @@
 # Despensa e Validades
 
-> Status: concepção. Este repositório contém apenas o escopo inicial; ainda não há aplicação executável ou funcionalidades implementadas.
+MVP em **TypeScript** para controlar lotes de alimentos e evitar desperdício, priorizando os itens com vencimento mais próximo (FEFO).
 
-## Ideia
+## Funcionalidades implementadas
 
-Organizar alimentos por lote e validade para reduzir desperdício doméstico.
+- Cadastro validado de lotes com produto, quantidade inteira e validade ISO.
+- Ordenação por data de vencimento e ID para desempate.
+- Consumo e descarte de estoque por produto, sem permitir saldo negativo.
+- Retirada automática dos lotes que vencem primeiro; movimentações mantêm os IDs e quantidades atendidos.
+- Estado imutável e relatório em JSON para inspeção e futura interface.
 
-## Primeira versão planejada
+## Executar
 
-- [ ] Cadastrar produto, quantidade e data de validade.
-- [ ] Listar itens que vencem primeiro.
-- [ ] Marcar consumo ou descarte.
+Instale Node.js 22+ e execute os comandos a partir da raiz:
 
-## Modelo inicial
+```bash
+npm install
+npm test
+node dist/cli.js examples/scenario.json
+```
 
-Produto, lote e movimentação.
+O arquivo `examples/scenario.json` cadastra dois lotes de arroz e um de feijão; depois consome quatro unidades de arroz e descarta uma de feijão. O relatório mostra que o lote mais próximo do vencimento é consumido primeiro.
 
-## Regras e limites
+## Testes
 
-Só aceitar quantidade positiva e datas válidas; consumo não pode deixar estoque negativo.
+`npm test` compila o TypeScript e roda testes automatizados cobrindo ordem FEFO, empate, imutabilidade, histórico, datas inválidas, duplicidade, consumo e descarte.
 
-Escopo mantido pequeno: sem pagamentos, integrações externas, infraestrutura de produção ou uso de dados pessoais reais nesta etapa.
+## Limitações
 
-## Tecnologia proposta
+Este primeiro incremento é **biblioteca de domínio com CLI de demonstração**. Ainda não há frontend React, IndexedDB, registro persistente de dados reais nem autenticação. Não utilizar informações pessoais nos exemplos. Quantidades representam unidades inteiras; pesagem fracionada requer nova modelagem e testes.
 
-TypeScript + React + IndexedDB.
 
-A escolha é uma proposta para a futura implementação; nenhuma dependência foi instalada e a tecnologia ainda não foi implementada.
+## Alertas de vencimento
 
-## Critério de conclusão do primeiro incremento
+O relatório opcional classifica os lotes ainda disponíveis como \`expired\` (validade anterior à data), \`due_soon\` (vence hoje ou dentro da janela) e \`fresh\` (fora da janela), com totais de lotes e unidades por categoria.
 
-Cadastrar dois lotes e consumir um deve atualizar o saldo e manter a ordenação por validade.
+```bash
+node dist/cli.js examples/scenario.json --as-of=2026-11-08
+node dist/cli.js examples/scenario.json --as-of=2026-11-08 --window=14
+```
 
-## Próximos passos
-
-1. Revisar este escopo antes de começar a implementação.
-2. Preparar o ambiente mínimo da tecnologia escolhida.
-3. Implementar um fluxo completo e validar o critério acima.
-4. Documentar a execução e acrescentar exemplos demonstrativos.
-
-## Possíveis evoluções
-
-Depois de validar o fluxo principal, avaliar persistência, acessibilidade e uma interface mais completa conforme a plataforma. Evoluções não fazem parte da entrega atual.
-
-## Como executar
-
-Ainda não há comandos de execução. Eles serão adicionados quando existir uma primeira versão funcional.
+As datas são comparadas como dias civis em UTC, sem depender do fuso horário da máquina. A janela é um inteiro de 0 a 3650 dias. Os relatórios não substituem a inspeção física dos alimentos nem determinam se um produto está próprio para consumo.
