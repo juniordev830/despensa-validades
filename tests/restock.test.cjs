@@ -58,3 +58,19 @@ test("does not order when minimum is zero, even with no inventory", () => {
     [{ product: "Leite", minimumUnits: 0, targetUnits: 10 }], "2026-11-08");
   assert.equal(result.totalOrderUnits, 0);
 });
+
+test("CLI prints optional reorder report and requires an explicit date", () => {
+  const { spawnSync } = require("node:child_process");
+  const args = ["dist/cli.js", "examples/scenario.json",
+    "--as-of=2026-11-08", "--restock=examples/restock-rules.json"];
+  const ok = spawnSync(process.execPath, args, { encoding: "utf8" });
+  assert.equal(ok.status, 0, ok.stderr);
+  const parsed = JSON.parse(ok.stdout);
+  assert.equal(parsed.restock.asOf, "2026-11-08");
+  assert.ok(parsed.restock.suggestions.some(item => item.product === "Arroz"));
+
+  const bad = spawnSync(process.execPath, [args[0], args[1], args[3]],
+    { encoding: "utf8" });
+  assert.equal(bad.status, 2);
+  assert.match(bad.stderr, /--as-of/);
+});
