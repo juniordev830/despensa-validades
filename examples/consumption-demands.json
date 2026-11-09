@@ -1,0 +1,17 @@
+[
+  {
+    "product": "Arroz",
+    "date": "2026-11-09",
+    "units": 3
+  },
+  {
+    "product": "Feijao",
+    "date": "2026-11-12",
+    "units": 2
+  },
+  {
+    "product": "Arroz",
+    "date": "2026-11-15",
+    "units": 2
+  }
+]
