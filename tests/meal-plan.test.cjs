@@ -113,3 +113,20 @@ test("bounded planning with 1000 independent demands", () => {
   assert.equal(result.totalMissing, 991);
   assert.equal(result.demands.filter(d => d.allocated === 0).length, 991);
 });
+
+test("CLI exposes the consumption plan and requires a reference date", () => {
+  const { spawnSync } = require("node:child_process");
+  const args = ["dist/cli.js", "examples/scenario.json",
+    "--as-of=2026-11-08", "--plan=examples/consumption-demands.json"];
+  const result = spawnSync(process.execPath, args, { encoding:"utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.consumptionPlan.asOf, "2026-11-08");
+  assert.equal(parsed.consumptionPlan.demands.length, 3);
+  assert.ok(parsed.consumptionPlan.totalRequested >= parsed.consumptionPlan.totalAllocated);
+  const missingDate = spawnSync(process.execPath,
+    ["dist/cli.js", "examples/scenario.json", "--plan=examples/consumption-demands.json"],
+    { encoding:"utf8" });
+  assert.equal(missingDate.status, 2);
+  assert.match(missingDate.stderr, /--as-of/);
+});
