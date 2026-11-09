@@ -77,3 +77,7 @@ e de 1.000 demandas por execucao e 1.000.000 de unidades por demanda.
 sem compras automaticas e sem previsao de demanda. A simulacao considera
 quantidades e datas explicitamente informadas; nao substitui controles de
 seguranca alimentar nem validacao operacional.
+
+## Risco de vencimento por produto
+
+A função pura `productExpiryRiskReport(pantry, asOf, windowDays)`, em `src/product-risk.ts`, agrupa quantidades de lotes **vencidos, vencendo na janela e ainda frescos** por nome de produto. O relatório ordena os produtos pelo volume vencido ou próximo do vencimento, apresenta `totalAtRiskUnits` e não modifica o estoque. O prazo padrão é de sete dias, com limite de 3650. Este é um sinal de priorização de estoque: não determina se alimentos podem ser consumidos.
