@@ -1,0 +1,12 @@
+[
+  {
+    "product": "Arroz",
+    "minimumUnits": 5,
+    "targetUnits": 12
+  },
+  {
+    "product": "Feijao",
+    "minimumUnits": 3,
+    "targetUnits": 8
+  }
+]
