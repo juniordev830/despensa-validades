@@ -41,3 +41,14 @@ node dist/cli.js examples/scenario.json --as-of=2026-11-08 --window=14
 ```
 
 As datas são comparadas como dias civis em UTC, sem depender do fuso horário da máquina. A janela é um inteiro de 0 a 3650 dias. Os relatórios não substituem a inspeção física dos alimentos nem determinam se um produto está próprio para consumo.
+
+## Planejamento de reposicao por estoque util
+
+O comando pode sugerir quanto comprar por produto a partir de um estoque minimo e de um objetivo definido manualmente. Lotes vencidos ou zerados **nao contam** como estoque disponivel; produtos que vencem exatamente na data da consulta ainda contam.
+
+```bash
+npm test
+node dist/cli.js examples/scenario.json --as-of=2026-11-08 --restock=examples/restock-rules.json
+```
+
+O arquivo de regras e uma lista JSON com `product`, `minimumUnits` e `targetUnits`. Se o estoque utilizavel ficar abaixo do minimo, o relatorio `restock` calcula a quantidade necessaria para chegar ao alvo, sem modificar lotes. Nao ha compras automatizadas, consulta a precos ou garantia de qualidade dos alimentos. Os testes automatizados cobrem expiracao, limiares, dados invalidos e imutabilidade.
