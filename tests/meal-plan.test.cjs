@@ -130,3 +130,28 @@ test("CLI exposes the consumption plan and requires a reference date", () => {
   assert.equal(missingDate.status, 2);
   assert.match(missingDate.stderr, /--as-of/);
 });
+
+test("tracks each product independently as lots expire or run out", () => {
+  const source = {
+    lots: [
+      { id: "rice-old", product: "Arroz", expiresOn: "2026-11-08", quantity: 2 },
+      { id: "beans", product: "Feijão", expiresOn: "2026-11-10", quantity: 3 },
+      { id: "rice-new", product: "Arroz", expiresOn: "2026-11-12", quantity: 5 },
+    ],
+    movements: [],
+  };
+  const plan = planConsumption(source, [
+    { product: "Arroz", date: "2026-11-08", units: 1 },
+    { product: "Feijão", date: "2026-11-09", units: 2 },
+    { product: "Arroz", date: "2026-11-09", units: 6 },
+    { product: "Feijão", date: "2026-11-10", units: 1 },
+  ], "2026-11-08");
+  assert.deepEqual(plan.demands.map(demand => demand.allocations), [
+    [{ lotId: "rice-old", units: 1 }],
+    [{ lotId: "beans", units: 2 }],
+    [{ lotId: "rice-new", units: 5 }],
+    [{ lotId: "beans", units: 1 }],
+  ]);
+  assert.deepEqual(plan.remainingLots.map(lot => lot.quantity), [1, 0, 0]);
+  assert.deepEqual(source.lots.map(lot => lot.quantity), [2, 3, 5]);
+});
