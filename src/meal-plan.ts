@@ -89,16 +89,26 @@ export function planConsumption(pantry: Pantry, demands: PlannedDemand[], asOf: 
   const sorted = remaining.slice().sort((a, b) =>
     a.expiresOn.localeCompare(b.expiresOn) || a.id.localeCompare(b.id));
 
+  const stockByProduct = new Map<string, { lots: Lot[]; next: number }>();
+  for (const lot of sorted) {
+    const stock = stockByProduct.get(lot.product);
+    if (stock) stock.lots.push(lot);
+    else stockByProduct.set(lot.product, { lots: [lot], next: 0 });
+  }
+
   const fulfilled: DemandFulfillment[] = [];
   let totalRequested = 0;
   let totalAllocated = 0;
   for (const demand of ordered) {
     let needed = demand.units;
     const allocations: PlannedAllocation[] = [];
-    for (const lot of sorted) {
-      if (needed === 0) break;
-      if (lot.product !== demand.product || lot.quantity === 0 ||
-          lot.expiresOn < demand.date) continue;
+    const stock = stockByProduct.get(demand.product);
+    while (stock && needed > 0 && stock.next < stock.lots.length) {
+      const lot = stock.lots[stock.next];
+      if (lot.quantity === 0 || lot.expiresOn < demand.date) {
+        stock.next++;
+        continue;
+      }
       const units = Math.min(needed, lot.quantity);
       lot.quantity -= units;
       needed -= units;
