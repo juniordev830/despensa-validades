@@ -77,12 +77,15 @@ export function planConsumption(pantry: Pantry, demands: PlannedDemand[], asOf: 
     return { product: demand.product.trim(), date: demand.date, units: demand.units, day, index };
   }).sort((a, b) => a.day - b.day || a.index - b.index);
 
+  const lotIds = new Set<string>();
   const remaining = pantry.lots.map(lot => {
     if (!lot || !Number.isSafeInteger(lot.quantity) || lot.quantity < 0 ||
         lot.quantity > MAX_UNITS || typeof lot.product !== "string" ||
         typeof lot.id !== "string") {
       throw new Error("Lote de estoque invalido");
     }
+    if (lotIds.has(lot.id)) throw new Error("Lote duplicado: " + lot.id);
+    lotIds.add(lot.id);
     dayNumber(lot.expiresOn);
     return { ...lot };
   });
