@@ -12,6 +12,12 @@ declare const process: {
 };
 const fs = require("node:fs");
 
+function readJson(path: string): unknown {
+  const data = fs.readFileSync(path);
+  const content = new TextDecoder("utf-8", { fatal: true }).decode(data);
+  return JSON.parse(content);
+}
+
 interface Scenario {
   lots: Lot[];
   movements: { product: string; quantity: number; kind: MovementType }[];
@@ -60,7 +66,7 @@ try {
     throw new Error("Uso: node dist/cli.js examples/scenario.json [--as-of=AAAA-MM-DD] [--window=7] [--restock=REGRAS.json] [--plan=DEMANDAS.json]");
   }
   const { asOf, windowDays, restockPath, planPath } = parseOptions(process.argv.slice(3));
-  const raw: unknown = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  const raw = readJson(process.argv[2]);
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Cenario invalido");
   const scenario = raw as Scenario;
   if (!Array.isArray(scenario.lots) || !Array.isArray(scenario.movements)) {
@@ -76,10 +82,10 @@ try {
     ...baseReport,
     expiry: expiryReport(pantry, asOf, windowDays ?? 7),
     ...(restockPath === undefined ? {} : {
-      restock: restockReport(pantry, JSON.parse(fs.readFileSync(restockPath, "utf8")) as RestockRule[], asOf),
+      restock: restockReport(pantry, readJson(restockPath) as RestockRule[], asOf),
     }),
     ...(planPath === undefined ? {} : {
-      consumptionPlan: planConsumption(pantry, JSON.parse(fs.readFileSync(planPath, "utf8")) as PlannedDemand[], asOf),
+      consumptionPlan: planConsumption(pantry, readJson(planPath) as PlannedDemand[], asOf),
     }),
   };
   process.stdout.write(JSON.stringify(output, null, 2) + "\n");

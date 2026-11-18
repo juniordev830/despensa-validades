@@ -131,6 +131,46 @@ test("CLI exposes the consumption plan and requires a reference date", () => {
   assert.match(missingDate.stderr, /--as-of/);
 });
 
+test("planning rejects duplicate lot IDs before creating ambiguous allocations", () => {
+  const pantry = sample();
+  pantry.lots.push({ ...pantry.lots[0] });
+  assert.throws(() => planConsumption(pantry, [], "2026-11-08"), /Lote duplicado: rice-later/);
+});
+
+test("CLI accepts a UTF-8 BOM in all inputs and rejects malformed UTF-8", () => {
+  const { spawnSync } = require("node:child_process");
+  const { mkdtempSync, readFileSync, writeFileSync, rmSync } = require("node:fs");
+  const { tmpdir } = require("node:os");
+  const { join } = require("node:path");
+  const dir = mkdtempSync(join(tmpdir(), "despensa-"));
+  try {
+    function copyWithBom(name) {
+      const file = join(dir, name);
+      writeFileSync(file, "\uFEFF" + readFileSync(join("examples", name), "utf8"));
+      return file;
+    }
+    const scenario = copyWithBom("scenario.json");
+    const demands = copyWithBom("consumption-demands.json");
+    const rules = copyWithBom("restock-rules.json");
+    const inputs = ["dist/cli.js", scenario, "--as-of=2026-11-08",
+      "--plan=" + demands, "--restock=" + rules];
+    const run = () => spawnSync(process.execPath, inputs, { encoding: "utf8" });
+    const result = run();
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(JSON.parse(result.stdout).consumptionPlan.demands.length, 3);
+
+    const invalid = Buffer.from('[{"product":"X","date":"2026-11-08","units":1}]');
+    invalid[invalid.indexOf("X")] = 0xff;
+    writeFileSync(demands, invalid);
+    const rejected = run();
+    assert.equal(rejected.status, 2);
+    assert.equal(rejected.stdout, "");
+    assert.match(rejected.stderr, /UTF-8|utf-8/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("tracks each product independently as lots expire or run out", () => {
   const source = {
     lots: [
