@@ -33,12 +33,20 @@ function requireQuantity(value: number): void {
 }
 
 function validName(value: string, label: string): void {
-  if (typeof value !== "string" || value.trim().length === 0 || value.length > 120) {
-    throw new Error(label + " obrigatorio, ate 120 caracteres");
+  if (typeof value !== "string" || value.trim().length === 0 || value.length > 120 ||
+      /[\u0000-\u001F\u007F]/.test(value)) {
+    throw new Error(label + " obrigatorio, ate 120 caracteres e sem controles");
   }
 }
 
+const MAX_LOTS = 5000;
+
 export function registerLot(pantry: Pantry, lot: Lot): Pantry {
+  if (!pantry || !Array.isArray(pantry.lots) || !Array.isArray(pantry.movements)) {
+    throw new Error("Despensa invalida");
+  }
+  if (pantry.lots.length >= MAX_LOTS) throw new Error("Limite de 5000 lotes atingido");
+  if (!lot || typeof lot !== "object") throw new Error("Lote invalido");
   validName(lot.id, "ID do lote");
   validName(lot.product, "Produto");
   requireQuantity(lot.quantity);
