@@ -34,7 +34,7 @@ function requireQuantity(value: number): void {
 
 function validName(value: string, label: string): void {
   if (typeof value !== "string" || value.trim().length === 0 || value.length > 120 ||
-      /[\\u0000-\\u001F\\u007F]/.test(value)) {
+      /[\u0000-\u001F\u007F]/.test(value)) {
     throw new Error(label + " obrigatorio, ate 120 caracteres e sem controles");
   }
 }
