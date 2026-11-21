@@ -39,7 +39,13 @@ function validName(value: string, label: string): void {
   }
 }
 
+const MAX_LOTS = 5000;
+
 export function registerLot(pantry: Pantry, lot: Lot): Pantry {
+  if (!pantry || !Array.isArray(pantry.lots) || !Array.isArray(pantry.movements)) {
+    throw new Error("Despensa invalida");
+  }
+  if (pantry.lots.length >= MAX_LOTS) throw new Error("Limite de 5000 lotes atingido");
   if (!lot || typeof lot !== "object") throw new Error("Lote invalido");
   validName(lot.id, "ID do lote");
   validName(lot.product, "Produto");
