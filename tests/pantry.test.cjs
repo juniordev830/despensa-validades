@@ -69,3 +69,18 @@ test("same-expiry tie breaker is deterministic", () => {
   p = registerLot(p, { id: "a", product: "Feijao", expiresOn: "2026-12-01", quantity: 2 });
   assert.equal(moveStock(p, "Feijao", 1, "consumed").movements[0].allocations[0].lotId, "a");
 });
+
+test("rejects control characters in lot identifiers and product names", () => {
+  const original = seed();
+  for (const field of ["id", "product"]) {
+    const record = { id: "new", product: "Arroz", expiresOn: "2027-01-01", quantity: 1 };
+    record[field] = "Texto\nInvalido";
+    assert.throws(() => registerLot(original, record), /sem controles/);
+  }
+  assert.throws(() => moveStock(original, "Arroz\tExtra", 1, "consumed"), /sem controles/);
+  assert.equal(report(original).units, 8);
+});
+
+test("rejects missing lot objects with a useful validation message", () => {
+  assert.throws(() => registerLot(seed(), null), /Lote invalido/);
+});
