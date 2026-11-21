@@ -86,3 +86,4 @@ A função pura `productExpiryRiskReport(pantry, asOf, windowDays)`, em `src/pro
 
 O [guia de validação e evolução](docs/GUIA_DE_VALIDACAO.md) registra o estado atual, os testes e os próximos incrementos deste projeto.
 \nOs nomes de produtos e identificadores de lote rejeitam quebras de linha, tabulações e outros caracteres de controle para evitar cadastros ambíguos e saídas de terminal inesperadas. Um lote ausente também recebe erro de validação explícito.\n
+O cadastro de lotes possui limite de 5.000 registros em uma mesma despensa para evitar expansão ilimitada do estado em memória. O programa recusa estados de despensa sem listas de lotes e movimentos.
