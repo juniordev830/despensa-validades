@@ -84,3 +84,20 @@ test("rejects control characters in lot identifiers and product names", () => {
 test("rejects missing lot objects with a useful validation message", () => {
   assert.throws(() => registerLot(seed(), null), /Lote invalido/);
 });
+
+test("enforces a bounded number of inventory lots", () => {
+  const p = emptyPantry();
+  p.lots = Array.from({ length: 5000 }, (_, index) => ({
+    id: "item-" + index, product: "Arroz", expiresOn: "2027-01-01", quantity: 1
+  }));
+  assert.throws(() => registerLot(p, {
+    id: "additional", product: "Arroz", expiresOn: "2027-01-01", quantity: 1
+  }), /5000/);
+  assert.equal(p.lots.length, 5000);
+});
+
+test("rejects malformed pantry states before modifying lot records", () => {
+  assert.throws(() => registerLot(null, {
+    id: "a", product: "Arroz", expiresOn: "2027-01-01", quantity: 1
+  }), /Despensa invalida/);
+});
