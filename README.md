@@ -82,6 +82,10 @@ seguranca alimentar nem validacao operacional.
 
 A função pura `productExpiryRiskReport(pantry, asOf, windowDays)`, em `src/product-risk.ts`, agrupa quantidades de lotes **vencidos, vencendo na janela e ainda frescos** por nome de produto. O relatório ordena os produtos pelo volume vencido ou próximo do vencimento, apresenta `totalAtRiskUnits` e não modifica o estoque. O prazo padrão é de sete dias, com limite de 3650. Este é um sinal de priorização de estoque: não determina se alimentos podem ser consumidos.
 
+O relatório também está disponível na CLI quando `--as-of` é informado, no campo JSON `productRisk`. A opção `--window` define a mesma janela para os relatórios de vencimento e risco por produto.
+
+Todos os arquivos JSON da CLI (cenário, regras e demandas) devem ser arquivos regulares UTF-8 de até 5 MiB. Entradas inválidas ou acima do limite terminam com código 2 e sem relatório parcial.
+
 ## Documentação de desenvolvimento
 
 O [guia de validação e evolução](docs/GUIA_DE_VALIDACAO.md) registra o estado atual, os testes e os próximos incrementos deste projeto.
