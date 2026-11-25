@@ -1,5 +1,6 @@
 import { emptyPantry, moveStock, registerLot, report, Lot, MovementType } from "./pantry";
 import { expiryReport } from "./expiry";
+import { productExpiryRiskReport } from "./product-risk";
 import { restockReport, RestockRule } from "./restock";
 import { planConsumption, PlannedDemand } from "./meal-plan";
 
@@ -13,9 +14,25 @@ declare const process: {
 const fs = require("node:fs");
 
 function readJson(path: string): unknown {
-  const data = fs.readFileSync(path);
-  const content = new TextDecoder("utf-8", { fatal: true }).decode(data);
-  return JSON.parse(content);
+  const maxBytes = 5 * 1024 * 1024;
+  const fd = fs.openSync(path, fs.constants.O_RDONLY | fs.constants.O_NONBLOCK);
+  try {
+    const stat = fs.fstatSync(fd);
+    if (!stat.isFile()) throw new Error("Entrada precisa ser arquivo regular");
+    if (stat.size > maxBytes) throw new Error("JSON excede 5 MiB");
+    const data = new Uint8Array(maxBytes + 1);
+    let used = 0;
+    while (used < data.length) {
+      const count = fs.readSync(fd, data, used, data.length - used, null);
+      if (count === 0) break;
+      used += count;
+    }
+    if (used > maxBytes) throw new Error("JSON excede 5 MiB");
+    const content = new TextDecoder("utf-8", { fatal: true }).decode(data.subarray(0, used));
+    return JSON.parse(content);
+  } finally {
+    fs.closeSync(fd);
+  }
 }
 
 interface Scenario {
@@ -81,6 +98,7 @@ try {
   const output = asOf === undefined ? baseReport : {
     ...baseReport,
     expiry: expiryReport(pantry, asOf, windowDays ?? 7),
+    productRisk: productExpiryRiskReport(pantry, asOf, windowDays ?? 7),
     ...(restockPath === undefined ? {} : {
       restock: restockReport(pantry, readJson(restockPath) as RestockRule[], asOf),
     }),
